@@ -29,7 +29,7 @@ public sealed class GoogleAuthService : MonoBehaviour
 
     #region WEB API
 
-    [Tooltip("OAuth 2.0 Web Client ID from Firebase Console.")]
+    [SerializeField][Tooltip("OAuth 2.0 Web Client ID from Firebase Console.")]
     private string webClientId = "693896604653-v6il5h42nq1b5sn23drmu9ro3o3c012j.apps.googleusercontent.com";
 
     #endregion

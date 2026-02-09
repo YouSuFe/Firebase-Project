@@ -11,6 +11,7 @@ public sealed class PopupService : MonoBehaviour
 
     #region Serialized Fields
 
+    [Header("Popup Canvas")]
     [SerializeField, Tooltip("Popup controller reference.")]
     private PopupController popupController;
 
