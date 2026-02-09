@@ -280,7 +280,7 @@ FirebaseBootstrapper, uygulama açılır açılmaz çalışan ve **tek yetkili y
 - Firebase başlatma işlemi **async** olarak tetiklenir
 - UI thread bloklanmaz
 - Ağ ve servis işlemleri arka planda yürütülür 
-```
+```csharp
 private async void Start()
 {
     await InitializeFirebaseAsync();
@@ -295,7 +295,7 @@ Dependency kontrolü:
 - Firebase’in cihazda çalışabilmesi için gerekli native bağımlılıkları kontrol eder
 - Eksik veya bozuk bağımlılıkları otomatik düzeltmeye çalışır
 - İşlem tamamlanana kadar metot bekler
-```
+```csharp
 DependencyStatus dependencyStatus =
     await FirebaseApp.CheckAndFixDependenciesAsync();
 ```
@@ -308,7 +308,7 @@ Dependency uygun değilse:
 - Uygulama ilerlemez
 - Kullanıcıya tam ekran bir hata popup’ı gösterilir
 - Kullanıcıdan aksiyon alınana kadar sistem güvenli state’te kalır
-```
+```csharp
 if (dependencyStatus != DependencyStatus.Available)
 {
     ShowConnectionErrorPopup();
@@ -333,7 +333,7 @@ Bu yaklaşım:
 
 - Sessiz hataları engeller
 - Kullanıcıyı belirsiz bir state’te bırakmaz
-```
+```csharp
 PopupService.Instance.ShowConfirmation(
     PopupType.Error,
     "Connection Error",
@@ -352,7 +352,7 @@ FirebaseAuth state değişimleri sürekli izlenir:
 - Çıkış
 - Token yenileme
 - Oturum restore edilmesi
-```
+```csharp
 firebaseAuth.StateChanged += OnAuthStateChanged;
 ```
 
@@ -361,7 +361,7 @@ State change handler içinde:
 - Sistem initialize değilse ignore edilir
 - Aynı kullanıcı için tekrar routing yapılması bilinçli olarak engellenir
 - Kullanıcı değiştiğinde routing tetiklenir
-```
+```csharp
 private void OnAuthStateChanged(object sender, EventArgs eventArgs)
 {
     if (!isInitialized)
@@ -383,7 +383,7 @@ RouteUserAsync:
 - Async çalışır
 - Aynı anda birden fazla kez çağrılmasını engelleyen `isRouting` guard’ına sahiptir
 - Kullanıcının state’ine göre Login veya Profile sahnesini yükler
-```
+```csharp
 private async void RouteUserAsync()
 ```
 ------------------------------------------------------------
@@ -396,7 +396,7 @@ Remember Me kapalıysa:
 
 - Firebase session aktif olsa bile kullanıcı çıkış yaptırılır
 - Login sahnesine yönlendirilir
-```
+```csharp
 if (isColdStart)
 {
     isColdStart = false;
@@ -417,7 +417,7 @@ Aktif kullanıcı yoksa:
 
 - Uygulama ilerlemez
 - Login sahnesine yönlendirilir
-```
+```csharp
 if (currentUser == null)
 {
     LoadSceneIfNeeded("Login");
@@ -432,7 +432,7 @@ Kullanıcı verisi Firebase’ten yeniden çekilir:
 
 - Email doğrulama durumu gibi bilgilerin stale olmasını engeller
 - En güncel auth state ile karar verilir
-```
+```csharp
 await currentUser.ReloadAsync();
 ```
 ------------------------------------------------------------
@@ -444,7 +444,7 @@ Auth reload sürecinde hata oluşursa:
 - Geçici network hataları tolere edilir
 - Auth state bozulduysa güvenli şekilde çıkış yapılır
 - Login sahnesine geri dönülür
-```
+```csharp
 catch (FirebaseException ex)
 {
     if (ex.ErrorCode != (int)AuthError.NetworkRequestFailed)
@@ -466,10 +466,10 @@ Email doğrulanmamışsa:
 1-) Popup ile kullanıcıya doğrulama maili gönderme seçeneği sunulur  
 2-) Firebase üzerinden doğrulama maili async gönderilir  
 3-) UI thread bloklanmaz  
-```
+```csharp
 if (isEmailPasswordUser && !currentUser.IsEmailVerified)
 ```
-```
+```csharp
 await currentUser.SendEmailVerificationAsync();
 ```
 ------------------------------------------------------------
@@ -480,7 +480,7 @@ Kullanıcı authenticate olduktan sonra Firestore profili kontrol edilir:
 
 - İlk girişse profil oluşturulur
 - Mevcut kullanıcıysa lastLoginAt / LastLoginDate güncellenir
-```
+```csharp
 await profileRepository.EnsureProfileExistsAndUpdateLoginAsync();
 ```
 ------------------------------------------------------------
@@ -490,7 +490,7 @@ await profileRepository.EnsureProfileExistsAndUpdateLoginAsync();
 Tüm kontroller başarıyla tamamlandıysa:
 
 - Kullanıcı Profile sahnesine yönlendirilir
-```
+```csharp
 LoadSceneIfNeeded("Profile");
 ```
 ------------------------------------------------------------
@@ -544,7 +544,7 @@ Bu servis:
 ## Email ile Giriş (Sign In)
 
 Email / şifre ile giriş süreci async olarak yürütülür.
-```
+```csharp
 public async Task SignInWithEmailAsync(string email, string password)
 {
     try
@@ -581,7 +581,7 @@ public async Task SignInWithEmailAsync(string email, string password)
 ## Email ile Kayıt (Sign Up)
 
 Email ile kayıt süreci Firebase üzerinde yeni kullanıcı oluşturur.
-```
+```csharp
 AuthResult result =
     await firebaseAuth.CreateUserWithEmailAndPasswordAsync(email, password);
 ```
@@ -595,7 +595,7 @@ Bu işlem:
 ## Display Name Ayarlama
 
 Kayıt sonrası kullanıcının görünen ismi Firebase Auth profiline yazılır.
-```
+```csharp
 await result.User.UpdateUserProfileAsync(profile);
 ```
 Bu bilgi:
@@ -608,7 +608,7 @@ Bu bilgi:
 ## Email Doğrulama Gönderimi
 
 Kayıt sonrası kullanıcıya doğrulama email’i gönderilir.
-```
+```csharp
 await result.User.SendEmailVerificationAsync();
 ```
 Bu aşamada:
@@ -621,7 +621,7 @@ Bu aşamada:
 ## Zorunlu Çıkış (Post-Signup)
 
 Email doğrulama sonrası kullanıcı **bilinçli olarak çıkış yaptırılır**.
-```
+```csharp
 firebaseAuth.SignOut();
 ```
 Bu yaklaşım:
@@ -634,7 +634,7 @@ Bu yaklaşım:
 ## Şifre Sıfırlama
 
 Kullanıcı şifresini unuttuğunda Firebase üzerinden reset maili gönderilir.
-```
+```csharp
 await firebaseAuth.SendPasswordResetEmailAsync(email);
 ```
 Bu işlemden sonra:
@@ -647,11 +647,11 @@ Bu işlemden sonra:
 ## Merkezi Hata Yönetimi
 
 Firebase kaynaklı hatalar **tek bir noktada** ele alınır.
-```
+```csharp
 AuthError authError = (AuthError)firebaseException.ErrorCode;
 MapFirebaseError(authError);
 ```
-```
+```csharp
 case AuthError.EmailAlreadyInUse:
     RaiseError(
         AuthErrorType.EmailAlreadyInUse,
@@ -673,11 +673,11 @@ Bu yaklaşım:
 ## UI Entegrasyonu (PopupService)
 
 AuthService, hata oluştuğunda sadece **event fırlatır**.
-```
+```csharp
 OnAuthError?.Invoke(errorType, message);
 ```
 UI katmanı:
-```
+```csharp
 PopupService.Instance.ShowError(title, message);
 ```
 - Bu event’e subscribe olur  
@@ -692,7 +692,7 @@ PopupService.Instance.ShowError(title, message);
 ## AuthSessionContext – Akış Farkındalığı
 
 AuthSessionContext, authentication sürecindeki **geçici state’leri** tutar.
-```
+```csharp
 public static bool IsSignUpInProgress { get; private set; }
 ```
 Bu yapı:
@@ -724,7 +724,7 @@ Bu servis:
 ## Google Sign-In Başlatma
 
 Google hesap seçimi async olarak başlatılır.
-```
+```csharp
 GoogleSignInUser googleUser =
     await GoogleSignIn.DefaultInstance.SignIn();
 ```
@@ -738,7 +738,7 @@ Bu işlem:
 ## Token Doğrulama
 
 Google’dan dönen IdToken kontrol edilir.
-```
+```csharp
 if (string.IsNullOrEmpty(googleUser.IdToken))
 ```
 Bu kontrol:
@@ -751,7 +751,7 @@ Bu kontrol:
 ## Firebase ile Kimlik Değişimi
 
 Google kimliği Firebase credential’a dönüştürülür.
-```
+```csharp
 Credential credential =
     GoogleAuthProvider.GetCredential(googleUser.IdToken, null);
 
@@ -767,7 +767,7 @@ Bu aşamada:
 ## Google Session Temizleme
 
 Google oturumu işlem sonrası temizlenir.
-```
+```csharp
 GoogleSignIn.DefaultInstance.SignOut();
 GoogleSignIn.DefaultInstance.Disconnect();
 ```
@@ -784,7 +784,7 @@ Google ve Firebase kaynaklı tüm hatalar:
 
 - Tek tip event mekanizmasıyla UI’ya iletilir  
 - PopupService üzerinden kullanıcıya gösterilir  
-```
+```csharp
 OnAuthError?.Invoke(errorType, message);
 ```
 ------------------------------------------------------------
@@ -824,7 +824,7 @@ Buradaki `{uid}`, Firebase Authentication tarafından üretilen **benzersiz kull
 
 Bu sınıf, Firestore’da saklanan kullanıcı verisinin  
 **strongly-typed** modelidir.
-```
+```csharp
 [FirestoreData]
 public sealed class UserProfileData
 {
@@ -871,7 +871,7 @@ Bu repository:
 
 - **Script:** FirebaseBootstrapper  
 - **Method:** RouteUserAsync  
-```
+```csharp
 await profileRepository.EnsureProfileExistsAndUpdateLoginAsync();
 ```
 Bu çağrı:
@@ -885,7 +885,7 @@ Bu çağrı:
 
 **Script:** UserProfileRepository  
 **Method:** EnsureProfileExistsAndUpdateLoginAsync
-```
+```csharp
 DocumentSnapshot snapshot =
     await docRef.GetSnapshotAsync();
 ```
@@ -904,7 +904,7 @@ Eğer Firestore belgesi **yoksa**:
 - Kullanıcı **ilk kez giriş yapıyor** demektir
 - FirebaseAuth’tan alınan verilerle Firestore dokümanı oluşturulur
 - `createdAt` alanı **server timestamp** ile set edilir
-```
+```csharp
 if (!snapshot.Exists)
 {
     updates["uid"] = user.UserId;
@@ -925,7 +925,7 @@ Belge **zaten varsa**:
 
 - Kullanıcının düzenleyebileceği alanlar **overwrite edilmez**
 - Sadece `lastLoginAt` alanı güncellenir
-```
+```csharp
 Dictionary<string, object> updates = new()
 {
     { "lastLoginAt", FieldValue.ServerTimestamp }
@@ -939,7 +939,7 @@ Bu yaklaşım:
 ------------------------------------------------------------
 
 ## Yazma İşlemi (Create / Update)
-```
+```csharp
 await docRef.SetAsync(updates, SetOptions.MergeAll);
 ```
 Bu `await`:
@@ -956,7 +956,7 @@ Bu `await`:
 
 - **Script:** Profile UI Logic  
 - **Method:** LoadProfile  
-```
+```csharp
 DocumentSnapshot snapshot =
     await docRef.GetSnapshotAsync();
 ```
@@ -965,7 +965,7 @@ Bu akışta:
 - Firestore’dan kullanıcı profili çekilir
 - Belge yoksa `null` döner
 - UI bu duruma göre **fallback** gösterebilir
-```
+```csharp
 return snapshot.ConvertTo<UserProfileData>();
 ```
 > Firestore JSON → UserProfileData dönüşümü  
@@ -983,10 +983,10 @@ Bu işlem **iki adımda** yapılır:
 
 1-) Firebase Authentication profilinin güncellenmesi  
 2-) Firestore’daki kullanıcı belgesinin güncellenmesi  
-```
+```csharp
 await user.UpdateUserProfileAsync(authProfile);
 ```
-```
+```csharp
 await docRef.UpdateAsync("displayName", trimmedName);
 ```
 > Bu iki adım **bilinçli olarak ayrılmıştır**.  
@@ -1004,7 +1004,7 @@ Google Sign-In kullanıcıları için:
 
 - Fotoğraf **yüklenmez**
 - Sadece **URL saklanır**
-```
+```csharp
 await user.UpdateUserProfileAsync(authProfile);
 await docRef.UpdateAsync("photoUrl", photoUrl);
 ```
@@ -1013,7 +1013,7 @@ await docRef.UpdateAsync("photoUrl", photoUrl);
 ## Hata Yönetimi
 
 Tüm Firestore işlemleri **try / catch** ile korunur.
-```
+```csharp
 catch (FirebaseException ex)
 {
     if (ex.ErrorCode == 7)
@@ -1085,10 +1085,10 @@ LoginUIController:
 
 LoginUIController, Email / Password authentication işlemleri için  
 **AuthService** ile doğrudan iletişim kurar.
-```
+```csharp
 private AuthService authService;
 ```
-```
+```csharp
 authService = new AuthService();
 authService.OnAuthError += HandleAuthError;
 ```
@@ -1103,7 +1103,7 @@ Bu bağlantı:
 
 LoginUIController, Google Sign-In işlemleri için  
 **GoogleAuthService** ile iletişim kurar.
-```
+```csharp
 GoogleAuthService.Instance.OnAuthError += HandleAuthError;
 ```
 Bu sayede:
@@ -1136,7 +1136,7 @@ Panel switch metodları:
 
 - **Script:** LoginUIController  
 - **Method:** OnSignInClicked  
-```
+```csharp
 await authService.SignInWithEmailAsync(email, password);
 ```
 ------------------------------------------------------------
@@ -1144,7 +1144,7 @@ await authService.SignInWithEmailAsync(email, password);
 ### Akış Adımları
 
 1-) **Input Validation**
-```
+```csharp
 if (string.IsNullOrWhiteSpace(...))
 ```
 - Boş veya geçersiz alanlar kontrol edilir  
@@ -1152,21 +1152,21 @@ if (string.IsNullOrWhiteSpace(...))
 - Gereksiz ağ çağrıları engellenir  
 
 2-) **Remember Me Kaydı**
-```
+```csharp
 RememberMeUtility.SetRememberMe(rememberMeToggle.isOn);
 ```
 - Kullanıcının tercihi kaydedilir  
 - Bu değer Bootstrap sahnesinde değerlendirilir  
 
 3-) **Loading UI**
-```
+```csharp
 LoadingService.Instance.Show();
 ```
 - Loading UI gösterilir  
 - Kullanıcıya işlem devam ederken geri bildirim sağlanır  
 
 4-) **AuthService → SignIn**
-```
+```csharp
 await authService.SignInWithEmailAsync(...)
 ```
 - FirebaseAuth’a giriş isteği gönderilir  
@@ -1188,7 +1188,7 @@ await authService.SignInWithEmailAsync(...)
 ------------------------------------------------------------
 
 ### Hata Olursa
-```
+```csharp
 PopupService.Instance.ShowError(
     "Authentication Error",
     message);
@@ -1205,7 +1205,7 @@ PopupService.Instance.ShowError(
 
 - **Script:** LoginUIController  
 - **Method:** OnGoogleSignInClicked  
-```
+```csharp
 await GoogleAuthService.Instance.SignInWithGoogleAsync();
 ```
 ------------------------------------------------------------
@@ -1235,7 +1235,7 @@ await GoogleAuthService.Instance.SignInWithGoogleAsync();
 
 - **Script:** LoginUIController  
 - **Method:** OnSignUpClicked  
-```
+```csharp
 bool success =
     await authService.SignUpWithEmailAsync(...);
 ```
@@ -1249,14 +1249,14 @@ bool success =
 - Şifre eşleşmesi doğrulanır  
 
 2-) **AuthSessionContext**
-```
+```csharp
 AuthSessionContext.BeginSignUp();
 ```
 - Signup süreci başlatılır  
 - Bootstrap routing geçici olarak baskılanır  
 
 3-) **AuthService → SignUp**
-```
+```csharp
 PopupService.Instance.ShowConfirmation(...)
 ```
 - Firebase kullanıcı oluşturur  
@@ -1280,7 +1280,7 @@ PopupService.Instance.ShowConfirmation(...)
 
 - **Script:** LoginUIController  
 - **Method:** OnForgotPasswordClicked  
-```
+```csharp
 await authService.SendPasswordResetEmailAsync(email);
 ```
 ------------------------------------------------------------
@@ -1303,7 +1303,7 @@ Bu yüzden UI:
 
 - Tüm AuthService ve GoogleAuthService hataları  
 - Tek bir popup akışıyla gösterilir  
-```
+```csharp
 private void HandleAuthError(AuthErrorType type, string message)
 ```
 ------------------------------------------------------------
@@ -1358,7 +1358,7 @@ ProfileUIController aşağıdaki sorumluluklara sahiptir:
 
 - **Script:** ProfileUIController  
 - **Method:** Start  
-```
+```csharp
 _ = InitializeAsync();
 ```
 Bu yaklaşım:
@@ -1374,7 +1374,7 @@ Bu aşamada:
 
 - Firestore repository instance’ı oluşturulur  
 - Profil yükleme süreci başlatılır  
-```
+```csharp
 profileRepository = new UserProfileRepository();
 await LoadProfileAsync();
 ```
@@ -1386,7 +1386,7 @@ await LoadProfileAsync();
 
 - **Script:** ProfileUIController  
 - **Method:** LoadProfileAsync  
-```
+```csharp
 currentProfile =
     await profileRepository.GetCurrentUserProfileAsync();
 ```
@@ -1402,7 +1402,7 @@ Bu `await`:
 
 - Profil verisi UI’ya bind edilir  
 - Edit butonu aktif hale getirilir  
-```
+```csharp
 BindProfileToUI(currentProfile);
 editButton.interactable = true;
 ```
@@ -1414,7 +1414,7 @@ Kullanıcıya hata popup’ı gösterilir ve iki seçenek sunulur:
 
 - Retry → Profil tekrar yüklenir  
 - Logout → Güvenli çıkış yapılır  
-```
+```csharp
 PopupService.Instance.ShowConfirmation(
     PopupType.Error,
     "Profile Error",
@@ -1433,7 +1433,7 @@ Bu tasarım:
 ## UI Binding (View Mode)
 
 ### BindProfileToUI()
-```
+```csharp
 displayNameText.text = profile.displayName;
 emailText.text = profile.email;
 ```
@@ -1446,7 +1446,7 @@ Ayrıca aşağıdaki alanlar gösterilir:
 
 - Hesap oluşturma tarihi  
 - Son giriş tarihi  
-```
+```csharp
 createdDateText.text = FormatDate(profile.CreatedAtUtc);
 lastLoginDateText.text = FormatDate(profile.LastLoginAtUtc);
 ```
@@ -1476,7 +1476,7 @@ kullanımı tercih edilmiştir.
 ### Fotoğraf Yoksa
 
 - Default avatar kullanılır  
-```
+```csharp
 if (string.IsNullOrWhiteSpace(photoUrl))
 {
     profileImage.sprite = defaultAvatarSprite;
@@ -1489,13 +1489,13 @@ if (string.IsNullOrWhiteSpace(photoUrl))
 
 - Görsel asenkron olarak indirilir  
 - UI donmaz  
-```
+```csharp
 yield return request.SendWebRequest();
 ```
 Hata olursa:
 
 - Default avatar fallback olarak kullanılır
-```
+```csharp
 profileImage.sprite = defaultAvatarSprite;
 ```
 
@@ -1507,7 +1507,7 @@ profileImage.sprite = defaultAvatarSprite;
 
 - Mevcut display name input alanına yazılır  
 - Edit paneli aktif edilir  
-```
+```csharp
 displayNameInput.text = currentProfile.displayName;
 editPanel.SetActive(true);
 ```
@@ -1517,7 +1517,7 @@ editPanel.SetActive(true);
 
 - Kullanıcı yeni display name girer  
 - Repository üzerinden update çağrılır  
-```
+```csharp
 await profileRepository.UpdateDisplayNameAsync(newDisplayName);
 ```
 Bu çağrı:
@@ -1534,7 +1534,7 @@ Bu çağrı:
 
 - UI lokal state güncellenir  
 - Edit paneli kapatılır  
-```
+```csharp
 currentProfile.displayName = newDisplayName;
 displayNameText.text = newDisplayName;
 editPanel.SetActive(false);
@@ -1545,7 +1545,7 @@ editPanel.SetActive(false);
 
 - Kullanıcı popup ile bilgilendirilir  
 - UI eski state’te kalır  
-```
+```csharp
 PopupService.Instance.ShowError(
     "Update Failed",
     "Failed to update display name...");
@@ -1559,7 +1559,7 @@ PopupService.Instance.ShowError(
 ### UI Entry Point
 
 - **Method:** OnLogoutClicked  
-```
+```csharp
 FirebaseAuth.DefaultInstance.SignOut();
 ```
 Bu çağrı:
@@ -1573,7 +1573,7 @@ Bu çağrı:
 
 - Google session temizlenir  
 - Bir sonraki girişte account picker zorlanır  
-```
+```csharp
 GoogleAuthService.Instance.ClearGoogleSession();
 ```
 ============================================================
